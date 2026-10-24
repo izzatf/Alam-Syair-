@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alam Syair — Pintu Gerbang & Dataran VR</title>
+  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Georgia, 'Times New Roman', serif; background:#17271f; }
+    #hud { position: fixed; z-index: 20; top: 16px; left: 16px; max-width: 330px; color: #fff6dc; background: rgba(36,22,14,.87); border: 1px solid #d9a849; border-radius: 15px; padding: 14px 16px; box-shadow: 0 12px 32px #0008; }
+    #hud h1 { margin: 0 0 6px; font-size: 22px; color:#f4ce79; }
+    #hud p { font-family:system-ui,sans-serif; font-size:12px; line-height:1.45; margin:0 0 10px; }
+    #message { border-top: 1px solid #82622b; padding-top: 8px; margin-top: 8px; color:#e9ce92; min-height:33px; }
+    #buttons { display: flex; flex-wrap:wrap; gap:6px; }
+    .btn { border: 1px solid #e2bb67; border-radius: 8px; background: #6b4026; color: #fff0c7; font-weight:700; font-size:12px; padding:8px 9px; cursor:pointer; }
+    .btn:hover, .btn:focus { background:#925329; outline-color: #efc46b; }
+    #load { position:fixed; z-index:30; inset:0; background:#18291e; display:flex; flex-direction:column; align-items:center;justify-content:center;color:#f5d390; font-family:Georgia,serif; text-align:center;padding:25px; }
+    #load .spinner { width:44px;height:44px;border:4px solid #88653a;border-top-color:#fbdc88;border-radius:50%;animation:spin 1.1s linear infinite;margin-bottom:22px; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+    #credit { position:fixed; z-index:21; bottom:12px; left:15px; padding:7px 10px; background:#2c261cbb; color:#f6e5be;font:11px system-ui,sans-serif;border-radius:8px;max-width:calc(100vw - 100px); }
+    @media(max-width:650px) { #hud {top:9px;left:9px;right:9px;max-width:none;padding:10px 12px;} #hud h1 {font-size:18px;} #hud p {font-size:11px;} .btn{font-size:11px;padding:7px 8px;} #credit{font-size:9px;bottom:8px;} }
+  </style>
+</head>
+<body>
+  <div id="load" role="status" aria-live="polite"><div class="spinner"></div><h2>Memasuki Alam Syair…</h2><p>Memuatkan pintu gerbang dan dataran 3D</p></div>
+  <aside id="hud">
+    <h1>✦ Alam Syair</h1>
+    <p><strong>Prototaip 01:</strong> Pintu Gerbang dan Dataran. Gunakan W/A/S/D untuk berjalan dan tetikus untuk melihat sekeliling. Pada telefon, sentuh skrin untuk melihat dan gunakan butang pandangan di bawah.</p>
+    <div id="buttons">
+      <button class="btn" data-view="gerbang">Pintu Gerbang</button>
+      <button class="btn" data-view="dataran">Dataran</button>
+      <button class="btn" data-view="kiri">Laluan Kiri</button>
+      <button class="btn" data-view="tengah">Laluan Tengah</button>
+      <button class="btn" data-view="kanan">Laluan Kanan</button>
+    </div>
+    <p id="message">Ketiga-tiga bangunan stesen akan dibangunkan dalam fasa berikutnya.</p>
+  </aside>
+  <div id="credit">Model GLB sebenar · A-Frame / WebXR · Tiada audio atau rakaman dalam prototaip ini</div>
+  <a-scene background="color:#9fd1e7" fog="type:linear; color:#b0d9e7; near:48; far:96" renderer="colorManagement:true; physicallyCorrectLights:false; antialias:true" vr-mode-ui="enabled:true" loading-screen="enabled:false">
+    <a-assets timeout="60000"><a-asset-item id="gateModel" src="assets/gerbang_dataran_alam_syair.glb"></a-asset-item></a-assets>
+    <a-sky color="#a9dbf4"></a-sky>
+    <a-light type="ambient" color="#ffffff" intensity="0.78"></a-light>
+    <a-light type="directional" color="#fff1d2" intensity="1.45" position="-9 15 6"></a-light>
+    <a-light type="hemisphere" color="#edf8ff" groundColor="#5f7650" intensity="0.48"></a-light>
+    <a-entity id="gateway" gltf-model="#gateModel" position="0 0 0"></a-entity>
+    <a-camera id="cam" position="0 1.75 11" near="0.05" far="110" wasd-controls="acceleration:24; fly:false" look-controls="pointerLockEnabled:false" cursor="rayOrigin:mouse" raycaster="objects:.clickable">
+      <a-cursor color="#f9d479" opacity="0.5" scale="0.6 0.6 0.6"></a-cursor>
+    </a-camera>
+  </a-scene>
+  <script>
+    const loading = document.getElementById('load');
+    const message = document.getElementById('message');
+    const scene = document.querySelector('a-scene');
+    const model = document.getElementById('gateway');
+    const camera = document.getElementById('cam');
+    model.addEventListener('model-loaded', () => { loading.style.display='none'; message.textContent='Model berjaya dimuatkan. Teroka pintu gerbang dan pilih laluan.'; });
+    model.addEventListener('model-error', (ev) => { loading.innerHTML='<h2>Model tidak dapat dimuatkan</h2><p>Jalankan projek melalui pelayan setempat (rujuk README.md), bukan dengan membuka index.html secara terus.</p>'; console.error(ev.detail); });
+    if (!window.AFRAME) { loading.innerHTML='<h2>Pustaka A-Frame tidak dimuatkan</h2><p>Sambungan Internet diperlukan untuk memuatkan pustaka A-Frame melalui CDN.</p>'; }
+    const views={
+       gerbang: {x:0,y:1.75,z:11, text:'Anda berada di pintu gerbang Selamat Datang.'},
+       dataran: {x:0,y:1.75,z:-5, text:'Anda berada di dataran permulaan. Tiga laluan tersedia.'},
+       kiri: {x:-8,y:1.75,z:-20, text:'Laluan ke Wakaf Senandung (bangunan akan ditambah kemudian).'},
+       tengah: {x:0,y:1.75,z:-26, text:'Laluan ke Balairung Syair (bangunan akan ditambah kemudian).'},
+       kanan: {x:8,y:1.75,z:-20, text:'Laluan ke Anjung Asah Seni (bangunan akan ditambah kemudian).'}
+    };
+    document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click', () => {
+      const v=views[button.dataset.view];camera.setAttribute('position',{x:v.x,y:v.y,z:v.z});message.textContent=v.text;
+    }));
+  </script>
+</body>
+</html>
